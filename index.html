@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pack My Bag</title>
+  <!-- Link to external CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Optional: Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" 
+    rel="stylesheet">
+</head>
+<body>
+
+  <!-- SHARED HEADER -->
+  <header class="site-header">
+    <div class="container">
+      <div class="logo">Pack My Bag</div>
+      <nav class="nav-menu">
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- PAGE 1: Index / Landing Page -->
+    <section id="page1" class="page active">
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <h1>Never Forget What to Pack Again</h1>
+        <p>AI-powered packing lists customized for your trip.</p>
+        <!-- Link to Trip Details Page -->
+        <button class="cta-btn" onclick="showPage('page2')">Start Packing</button>
+      </div>
+
+      <!-- How It Works -->
+      <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step">
+            <h3>1. Enter Your Trip Details</h3>
+            <p>Destination, dates, activities &amp; more.</p>
+          </div>
+          <div class="step">
+            <h3>2. Get Your List</h3>
+            <p>Personalized, weather-aware packing suggestions.</p>
+          </div>
+          <div class="step">
+            <h3>3. Pack With Peace of Mind</h3>
+            <p>Check items off and travel worry-free.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Features -->
+      <section class="key-features">
+        <h2>Key Features</h2>
+        <div class="features-list">
+          <div class="feature-item">
+            <h4>Group Coordination</h4>
+            <p>Plan who brings what in a shared list.</p>
+          </div>
+          <div class="feature-item">
+            <h4>Smart Weather-Aware</h4>
+            <p>No umbrella if it’s sunny all week.</p>
+          </div>
+          <div class="feature-item">
+            <h4>Save &amp; Reuse Lists</h4>
+            <p>Keep your packing templates for future trips.</p>
+          </div>
+          <div class="feature-item">
+            <h4>AI Recommendations</h4>
+            <p>Must-haves based on destination &amp; activities.</p>
+          </div>
+          <div class="feature-item">
+            <h4>Community Tips</h4>
+            <p>Get real traveler insights for your location.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonial -->
+      <section class="testimonial-section">
+        <h2>Real-Life Use Case / Testimonial</h2>
+        <div class="testimonial">
+          <p>
+            <strong>“Pack My Bag helped me perfectly prepare for my weekend in Coorg!”</strong><br>
+            — Ayesha, Weekend Wanderer
+          </p>
+        </div>
+      </section>
+
+      <!-- Newsletter Signup -->
+      <section class="newsletter-section">
+        <h2>Join the Beta / Newsletter Signup</h2>
+        <p>Want to be a smarter traveler?</p>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Your email address" />
+          <button class="cta-btn">Join Now</button>
+        </div>
+      </section>
+    </section>
+    <!-- END PAGE 1 -->
+
+
+    <!-- PAGE 2: Trip Details -->
+    <section id="page2" class="page">
+      <div class="trip-details-container">
+        <!-- Trip Details Form -->
+        <div class="trip-form">
+          <h2>Enter Trip Details</h2>
+          <label for="destination">Destination(s):</label>
+          <input type="text" id="destination" placeholder="e.g. Paris, Coorg" />
+
+          <label for="travel-dates">Travel Dates:</label>
+          <input type="text" id="travel-dates" placeholder="e.g. 2023-05-10 to 2023-05-15" />
+
+          <label for="duration">Duration:</label>
+          <input type="number" id="duration" placeholder="Number of days" />
+
+          <label for="travel-type">Travel Type:</label>
+          <select id="travel-type">
+            <option>Leisure</option>
+            <option>Business</option>
+            <option>Adventure</option>
+            <option>Backpacking</option>
+          </select>
+
+          <label for="activities">Activities Planned:</label>
+          <input type="text" id="activities" placeholder="Hiking, beach, city tours" />
+
+          <label for="accommodation">Accommodation Type:</label>
+          <select id="accommodation">
+            <option>Hotel</option>
+            <option>Hostel</option>
+            <option>Camping</option>
+            <option>Airbnb</option>
+          </select>
+
+          <label for="luggage-type">Luggage Type:</label>
+          <select id="luggage-type">
+            <option>Checked-in</option>
+            <option>Cabin only</option>
+            <option>Backpack</option>
+          </select>
+
+          <!-- Link to Packing List Page -->
+          <button class="cta-btn" onclick="showPage('page3')">Generate Packing List</button>
+        </div>
+
+        <!-- Optional Filters & Tips -->
+        <div class="optional-filters">
+          <h2>Optional Filters</h2>
+          <label for="gender">Gender:</label>
+          <select id="gender">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+
+          <label for="kids">Traveling with kids?</label>
+          <select id="kids">
+            <option value="">No</option>
+            <option>Yes</option>
+          </select>
+
+          <label for="first-time">First-time Traveler?</label>
+          <select id="first-time">
+            <option value="">No</option>
+            <option>Yes</option>
+          </select>
+
+          <label for="special-needs">Special Needs:</label>
+          <input type="text" id="special-needs" placeholder="Meds, baby stuff, camera gear..." />
+
+          <div class="travel-tips">
+            <h3>Travel Tips</h3>
+            <ul>
+              <li>Always keep a digital copy of important docs.</li>
+              <li>Research local customs to avoid faux pas.</li>
+              <li>Pack versatile clothing for different climates.</li>
+              <li>Check luggage size restrictions carefully.</li>
+              <li>Review travel insurance coverage.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Example Weather / Currency Info (optional) -->
+        <div class="sidebar-info">
+          <h3>Weather Forecast</h3>
+          <p>Sunny, 25°C<br>Cloudy, 22°C<br>Rainy, 19°C</p>
+
+          <h3>Currency Rates</h3>
+          <p>USD: 1<br>EUR: 0.85<br>GBP: 0.75</p>
+        </div>
+      </div>
+    </section>
+    <!-- END PAGE 2 -->
+
+
+    <!-- PAGE 3: Packing List -->
+    <section id="page3" class="page">
+      <div class="packing-list-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <h2>Reminders</h2>
+          <label><input type="checkbox" /> Items not packed</label><br>
+          <label><input type="checkbox" /> To-do tasks</label><br>
+          <button>Save Packing Profile</button>
+          <button>Share with Travel Buddies</button>
+        </div>
+
+        <!-- Packing List -->
+        <div class="packing-list">
+          <h2>Packing List</h2>
+
+          <div class="item-category">
+            <h3>Clothes</h3>
+            <label><input type="checkbox" /> 5 Shirts</label><br>
+            <label><input type="checkbox" /> 2 Pairs of Trousers</label>
+          </div>
+
+          <div class="item-category">
+            <h3>Toiletries</h3>
+            <label><input type="checkbox" /> Toothbrush &amp; Paste</label><br>
+            <label><input type="checkbox" /> Shampoo</label>
+          </div>
+
+          <div class="item-category">
+            <h3>Gadgets</h3>
+            <label><input type="checkbox" /> Phone Charger</label><br>
+            <label><input type="checkbox" /> Power Adapter for Europe</label>
+          </div>
+
+          <div class="item-category">
+            <h3>Travel Docs</h3>
+            <label><input type="checkbox" /> Passport</label><br>
+            <label><input type="checkbox" /> Boarding Pass</label>
+          </div>
+
+          <div class="item-category">
+            <h3>Meds</h3>
+            <label><input type="checkbox" /> Painkillers</label><br>
+            <label><input type="checkbox" /> Allergy meds</label>
+          </div>
+
+          <div class="item-category">
+            <h3>Optional Extras</h3>
+            <label><input type="checkbox" /> Sunglasses</label><br>
+            <label><input type="checkbox" /> Travel Pillow</label>
+          </div>
+
+          <p class="weight-estimator">Estimated weight: 12 kg</p>
+
+          <button>Export PDF</button>
+          <button>Email List</button>
+          <!-- Link to Group Pack List Page -->
+          <button class="cta-btn" onclick="showPage('page4')">Create Group Pack List</button>
+        </div>
+      </div>
+    </section>
+    <!-- END PAGE 3 -->
+
+
+    <!-- PAGE 4: Group Packing List -->
+    <section id="page4" class="page">
+      <div class="group-list-container">
+        <h2>Share List With</h2>
+        <label><input type="checkbox" /> Alice Johnson</label><br>
+        <label><input type="checkbox" /> Bob Smith</label><br>
+        <label><input type="checkbox" /> Charlie Brown</label><br>
+        <button>Manage Sharing</button>
+
+        <h2>Packing List</h2>
+        <div class="packing-item">
+          <label for="item1">Toothbrush</label>
+          <select id="item1">
+            <option>Assign to...</option>
+            <option>Alice</option>
+            <option>Bob</option>
+            <option>Charlie</option>
+          </select>
+          <button>Add Item</button>
+        </div>
+        <div class="packing-item">
+          <label for="item2">Sunscreen</label>
+          <select id="item2">
+            <option>Assign to...</option>
+            <option>Alice</option>
+            <option>Bob</option>
+            <option>Charlie</option>
+          </select>
+          <button>Add Item</button>
+        </div>
+        <div class="packing-item">
+          <input type="text" placeholder="New item name..." />
+          <select>
+            <option>Assign to...</option>
+            <option>Alice</option>
+            <option>Bob</option>
+            <option>Charlie</option>
+          </select>
+          <button>Add Item</button>
+        </div>
+      </div>
+    </section>
+    <!-- END PAGE 4 -->
+
+  </main>
+
+  <!-- SHARED FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2023 Pack My Bag. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- SIMPLE JS TOGGLE LOGIC -->
+  <script>
+    function showPage(pageId) {
+      // Hide all .page sections
+      document.querySelectorAll('.page').forEach(section => {
+        section.style.display = 'none';
+      });
+      // Show the selected page
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    // By default, show page1 (index)
+    window.onload = () => {
+      document.querySelectorAll('.page').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById('page1').style.display = 'block';
+    };
+  </script>
+
+</body>
+</html>
