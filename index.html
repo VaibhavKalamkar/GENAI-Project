@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pack My Bag</title>
+  <title>Pack My Bag - Mistral Chat (Handle Lumps)</title>
   <!-- Link to external CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 
   <!-- Optional: Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
       <!-- Hero Section -->
       <div class="hero-section">
         <h1>Never Forget What to Pack Again</h1>
-        <p>AI-powered packing lists customized for your trip.</p>
+        <p>AI-powered packing lists with multiline preservation, improved category parsing, and same-line heading handling.</p>
         <!-- Link to Trip Details Page -->
         <button class="cta-btn" onclick="showPage('page2')">Start Packing</button>
       </div>
@@ -48,11 +48,11 @@
         <div class="steps">
           <div class="step">
             <h3>1. Enter Your Trip Details</h3>
-            <p>Destination, dates, activities &amp; more.</p>
+            <p>Destination, dates, activities & more.</p>
           </div>
           <div class="step">
             <h3>2. Get Your List</h3>
-            <p>Personalized, weather-aware packing suggestions.</p>
+            <p>Mistral's chat model returns short, line-by-line items. Or lumps them.</p>
           </div>
           <div class="step">
             <h3>3. Pack With Peace of Mind</h3>
@@ -74,12 +74,12 @@
             <p>No umbrella if it’s sunny all week.</p>
           </div>
           <div class="feature-item">
-            <h4>Save &amp; Reuse Lists</h4>
+            <h4>Save & Reuse Lists</h4>
             <p>Keep your packing templates for future trips.</p>
           </div>
           <div class="feature-item">
             <h4>AI Recommendations</h4>
-            <p>Must-haves based on destination &amp; activities.</p>
+            <p>Must-haves based on destination & activities.</p>
           </div>
           <div class="feature-item">
             <h4>Community Tips</h4>
@@ -153,8 +153,7 @@
             <option>Backpack</option>
           </select>
 
-          <!-- Link to Packing List Page -->
-          <button class="cta-btn" onclick="showPage('page3')">Generate Packing List</button>
+          <button class="cta-btn" onclick="generatePackingList()">Generate Packing List</button>
         </div>
 
         <!-- Optional Filters & Tips -->
@@ -184,7 +183,7 @@
           <input type="text" id="special-needs" placeholder="Meds, baby stuff, camera gear..." />
 
           <div class="travel-tips">
-            <h3>Travel Tips</h3>
+            <h2>Travel Tips</h2>
             <ul>
               <li>Always keep a digital copy of important docs.</li>
               <li>Research local customs to avoid faux pas.</li>
@@ -224,47 +223,42 @@
         <div class="packing-list">
           <h2>Packing List</h2>
 
-          <div class="item-category">
+          <!-- Raw multiline debug output (hidden for users) -->
+          <div class="item-category" style="white-space: pre-line; display: none;">
+            <h3>Raw Output (Debug)</h3>
+            <div id="mistralRawOutput"></div>
+          </div>
+
+          <!-- We'll dynamically create checkboxes here for each category -->
+          <div class="item-category" id="clothesCategory">
             <h3>Clothes</h3>
-            <label><input type="checkbox" /> 5 Shirts</label><br>
-            <label><input type="checkbox" /> 2 Pairs of Trousers</label>
+            <div id="clothesOutput"></div>
           </div>
-
-          <div class="item-category">
+          <div class="item-category" id="toiletriesCategory">
             <h3>Toiletries</h3>
-            <label><input type="checkbox" /> Toothbrush &amp; Paste</label><br>
-            <label><input type="checkbox" /> Shampoo</label>
+            <div id="toiletriesOutput"></div>
           </div>
-
-          <div class="item-category">
+          <div class="item-category" id="gadgetsCategory">
             <h3>Gadgets</h3>
-            <label><input type="checkbox" /> Phone Charger</label><br>
-            <label><input type="checkbox" /> Power Adapter for Europe</label>
+            <div id="gadgetsOutput"></div>
           </div>
-
-          <div class="item-category">
+          <div class="item-category" id="docsCategory">
             <h3>Travel Docs</h3>
-            <label><input type="checkbox" /> Passport</label><br>
-            <label><input type="checkbox" /> Boarding Pass</label>
+            <div id="docsOutput"></div>
           </div>
-
-          <div class="item-category">
+          <div class="item-category" id="medsCategory">
             <h3>Meds</h3>
-            <label><input type="checkbox" /> Painkillers</label><br>
-            <label><input type="checkbox" /> Allergy meds</label>
+            <div id="medsOutput"></div>
           </div>
-
-          <div class="item-category">
+          <div class="item-category" id="extrasCategory">
             <h3>Optional Extras</h3>
-            <label><input type="checkbox" /> Sunglasses</label><br>
-            <label><input type="checkbox" /> Travel Pillow</label>
+            <div id="extrasOutput"></div>
           </div>
 
           <p class="weight-estimator">Estimated weight: 12 kg</p>
 
           <button>Export PDF</button>
           <button>Email List</button>
-          <!-- Link to Group Pack List Page -->
           <button class="cta-btn" onclick="showPage('page4')">Create Group Pack List</button>
         </div>
       </div>
@@ -321,18 +315,25 @@
   <!-- SHARED FOOTER -->
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; 2023 Pack My Bag. All rights reserved.</p>
+      <p>© 2023 Pack My Bag. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- SIMPLE JS TOGGLE LOGIC -->
+  <!-- SIMPLE JS TOGGLE LOGIC + MISTRAL CHAT INTEGRATION -->
   <script>
+    /*************************************************
+     * 1) Declare MISTRAL_API_KEY FIRST
+     *************************************************/
+    const MISTRAL_API_KEY = "Qo3UkuQbLN35xKltzOVEQ0nLfgBG7mvq"; 
+      // Exposing your key in client-side code is not secure for production.
+
+    /*************************************************
+     * 2) Show/hide pages
+     *************************************************/
     function showPage(pageId) {
-      // Hide all .page sections
       document.querySelectorAll('.page').forEach(section => {
         section.style.display = 'none';
       });
-      // Show the selected page
       document.getElementById(pageId).style.display = 'block';
     }
 
@@ -343,6 +344,168 @@
       });
       document.getElementById('page1').style.display = 'block';
     };
+
+    /*************************************************
+     * 3) Prompt for EXACT headings & short items
+     *************************************************/
+    function buildUserMessage(data) {
+      return `
+Please provide a packing list based on:
+- Destination: ${data.destination}
+- Travel Dates: ${data.travelDates}
+- Duration: ${data.duration} days
+- Travel Type: ${data.travelType}
+- Activities: ${data.activities}
+- Accommodation: ${data.accommodationType}
+- Luggage: ${data.luggageType}
+- Gender: ${data.gender}
+- With kids: ${data.kids}
+- First-time traveler: ${data.firstTime}
+- Special needs: ${data.specialNeeds}
+
+**Constraints**:
+1. Use exact category headings on separate lines: 
+   "Clothes"
+   "Toiletries"
+   "Gadgets"
+   "Travel Docs"
+   "Meds"
+   "Optional Extras"
+2. Provide a maximum of 8 items per category.
+3. Each item must be no more than 3 words.
+4. Ideally each item is under 15 characters total.
+5. Provide only item lists (no lengthy paragraphs).
+6. Avoid braces, parentheses, or special punctuation. Use plain text lines.
+7. If you place the heading and items on the same line, put a dash between them, e.g. "Clothes - Jeans - Shirt"
+`;
+    }
+
+    /*************************************************
+     * 4) Chat Completions request to Mistral
+     *************************************************/
+    async function generatePackingList() {
+      // Collect the 11 fields
+      const data = {
+        destination: document.getElementById('destination').value,
+        travelDates: document.getElementById('travel-dates').value,
+        duration: document.getElementById('duration').value,
+        travelType: document.getElementById('travel-type').value,
+        activities: document.getElementById('activities').value,
+        accommodationType: document.getElementById('accommodation').value,
+        luggageType: document.getElementById('luggage-type').value,
+        gender: document.getElementById('gender').value,
+        kids: document.getElementById('kids').value,
+        firstTime: document.getElementById('first-time').value,
+        specialNeeds: document.getElementById('special-needs').value
+      };
+
+      const userMessage = buildUserMessage(data);
+
+      try {
+        const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${MISTRAL_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "mistral-large-latest", 
+            messages: [
+              {
+                role: "user",
+                content: userMessage
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`Mistral API error: ${response.status} ${response.statusText}\n${errorBody}`);
+        }
+
+        const result = await response.json();
+        // Typically, the text is in result.choices[0].message.content
+        const packingResponse = result.choices?.[0]?.message?.content || "No response from Mistral.";
+
+        // 5) Show raw text with newlines preserved
+        document.getElementById("mistralRawOutput").textContent = packingResponse;
+
+        // 6) Parse & Display the output as checkboxes
+        displayPackingList(packingResponse);
+
+        // Show the "Packing List" page
+        showPage('page3');
+
+      } catch (err) {
+        alert("Error: " + err.message);
+        console.error(err);
+      }
+    }
+
+    /*************************************************
+     * 7) Updated parser to handle multi-line categories and create checkboxes
+     *************************************************/
+    function displayPackingList(responseText) {
+      // Clear existing outputs
+      ['clothesOutput', 'toiletriesOutput', 'gadgetsOutput', 'docsOutput', 'medsOutput', 'extrasOutput']
+        .forEach(id => document.getElementById(id).innerHTML = '');
+
+      // Map from category name (lowercase) to output div ID
+      const categoryMap = {
+        "clothes": "clothesOutput",
+        "toiletries": "toiletriesOutput",
+        "gadgets": "gadgetsOutput",
+        "travel docs": "docsOutput",
+        "meds": "medsOutput",
+        "optional extras": "extrasOutput"
+      };
+
+      // Split the response into lines
+      const lines = responseText.split('\n').map(line => line.trim()).filter(Boolean);
+      let currentCategory = null;
+
+      for (let line of lines) {
+        // Clean the line by removing special characters
+        line = line.replace(/[{}()\*\:]/g, '').trim();
+        if (!line) continue;
+
+        // Check if the line is a category (case-insensitive)
+        const lowerLine = line.toLowerCase();
+        let foundCategory = null;
+        for (const cat in categoryMap) {
+          if (lowerLine === cat) {
+            foundCategory = cat;
+            break;
+          }
+        }
+
+        if (foundCategory) {
+          // If we found a category, set it as the current one
+          currentCategory = foundCategory;
+        } else if (currentCategory && categoryMap[currentCategory]) {
+          // If we have a current category and it exists in the map, treat this line as an item
+          let item = line;
+          // Truncate item if longer than 15 chars
+          if (item.length > 15) {
+            item = item.substring(0, 15) + '...';
+          }
+          // Skip if item is too short
+          if (item.length < 2) continue;
+
+          // Create a checkbox for the item
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          const label = document.createElement('label');
+          label.style.display = 'block';
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(' ' + item));
+
+          // Append to the correct category output div
+          document.getElementById(categoryMap[currentCategory]).appendChild(label);
+        }
+      }
+    }
   </script>
 
 </body>
