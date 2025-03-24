@@ -7,6 +7,9 @@
   <!-- Link to external CSS -->
   <link rel="stylesheet" href="styles.css" />
 
+  <!-- Google Identity Services Library for Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Optional: Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +36,24 @@
     .logo-container .logo {
       font-size: 24px;
       font-weight: 700;
+    }
+    /* Styling for Google Sign-In button container */
+    #google-signin-btn {
+      margin: 1rem auto;
+      display: block;
+      text-align: center;
+    }
+    /* Styling for user info display */
+    #user-info {
+      text-align: center;
+      margin-top: 1rem;
+      display: none; /* Hidden by default */
+    }
+    #user-info img {
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
@@ -63,6 +84,29 @@
       <div class="hero-section">
         <h1>Never Forget What to Pack Again</h1>
         <p>AI-powered packing lists with multiline preservation, improved category parsing, and same-line heading handling.</p>
+        
+        <!-- Google Sign-In Button -->
+        <div id="google-signin-btn">
+          <div id="g_id_signin"
+               data-type="standard"
+               data-size="large"
+               data-theme="outline"
+               data-text="sign_in_with"
+               data-shape="rectangular"
+               data-logo_alignment="left"
+               data-client_id="786552871371-efu3m88ao1canf2egp3dtqu1quf76uqk.apps.googleusercontent.com"
+               data-callback="handleCredentialResponse">
+          </div>
+        </div>
+
+        <!-- User Info Display (shown after login) -->
+        <div id="user-info">
+          <img id="user-picture" src="" alt="User Profile Picture">
+          <p>Welcome, <span id="user-name"></span>!</p>
+          <p>Email: <span id="user-email"></span></p>
+          <button onclick="signOut()" class="cta-btn">Sign Out</button>
+        </div>
+
         <!-- Link to Trip Details Page -->
         <button class="cta-btn" onclick="showPage('page2')">Start Packing</button>
       </div>
@@ -341,7 +385,7 @@
     </div>
   </footer>
 
-  <!-- SIMPLE JS TOGGLE LOGIC + MISTRAL CHAT INTEGRATION -->
+  <!-- SIMPLE JS TOGGLE LOGIC + MISTRAL CHAT INTEGRATION + GOOGLE SIGN-IN -->
   <script>
     /*************************************************
      * 1) Declare MISTRAL_API_KEY FIRST
@@ -365,6 +409,17 @@
         section.style.display = 'none';
       });
       document.getElementById('page1').style.display = 'block';
+
+      // Check for existing user in localStorage
+      const user = localStorage.getItem('user');
+      if (user) {
+        const userData = JSON.parse(user);
+        document.getElementById('user-name').textContent = userData.name;
+        document.getElementById('user-email').textContent = userData.email;
+        document.getElementById('user-picture').src = userData.picture;
+        document.getElementById('user-info').style.display = 'block';
+        document.getElementById('google-signin-btn').style.display = 'none';
+      }
     };
 
     /*************************************************
@@ -527,6 +582,54 @@ Please provide a packing list based on:
           document.getElementById(categoryMap[currentCategory]).appendChild(label);
         }
       }
+    }
+
+    /*************************************************
+     * 8) Google Sign-In Handling
+     *************************************************/
+    // Callback function for Google Sign-In
+    function handleCredentialResponse(response) {
+      // Decode the JWT ID token
+      const responsePayload = parseJwt(response.credential);
+
+      // Display user info
+      document.getElementById('user-name').textContent = responsePayload.name;
+      document.getElementById('user-email').textContent = responsePayload.email;
+      document.getElementById('user-picture').src = responsePayload.picture;
+      document.getElementById('user-info').style.display = 'block';
+
+      // Hide the sign-in button
+      document.getElementById('google-signin-btn').style.display = 'none';
+
+      // Optionally store user info in localStorage or send to your backend
+      localStorage.setItem('user', JSON.stringify({
+        name: responsePayload.name,
+        email: responsePayload.email,
+        picture: responsePayload.picture
+      }));
+    }
+
+    // Function to parse JWT token
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    // Sign-out function
+    function signOut() {
+      // Clear user info display
+      document.getElementById('user-info').style.display = 'none';
+      document.getElementById('google-signin-btn').style.display = 'block';
+
+      // Clear localStorage
+      localStorage.removeItem('user');
+
+      // Optionally, you can revoke the token on the server-side if needed
+      console.log('User signed out.');
     }
   </script>
 
