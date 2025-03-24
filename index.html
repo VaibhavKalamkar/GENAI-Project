@@ -138,8 +138,8 @@
     .packing-item button {
       padding: 0.5rem 1rem;
     }
-    /* Styling for buttons on Page 3 */
-    .packing-list button {
+    /* Styling for buttons on Page 3 and Page 4 */
+    .packing-list button, .group-list-container button {
       margin-right: 0.5rem;
       padding: 0.5rem 1rem;
       border: 1px solid #ccc;
@@ -147,10 +147,21 @@
       background: #fff;
       cursor: pointer;
     }
-    .packing-list .cta-btn {
+    .packing-list .cta-btn, .group-list-container .cta-btn {
       background: #28a745;
       color: #fff;
       border: none;
+    }
+    /* Styling for date inputs */
+    .date-range {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .date-range input[type="date"] {
+      padding: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -293,8 +304,12 @@
           <label for="destination">Destination(s):</label>
           <input type="text" id="destination" placeholder="e.g. Paris, Coorg" />
 
-          <label for="travel-dates">Travel Dates:</label>
-          <input type="text" id="travel-dates" placeholder="e.g. 2023-05-10 to 2023-05-15" />
+          <label>Travel Dates:</label>
+          <div class="date-range">
+            <input type="date" id="start-date" placeholder="Start Date" />
+            <span>to</span>
+            <input type="date" id="end-date" placeholder="End Date" />
+          </div>
 
           <label for="duration">Duration:</label>
           <input type="number" id="duration" placeholder="Number of days" />
@@ -449,6 +464,10 @@
         <div id="group-packing-list">
           <!-- Group packing list items will be dynamically added here -->
         </div>
+
+        <!-- Export and Email Buttons -->
+        <button onclick="exportGroupListToPDF()">Export PDF</button>
+        <button onclick="emailGroupList()">Email List</button>
       </div>
     </section>
     <!-- END PAGE 4 -->
@@ -458,7 +477,7 @@
   <!-- SHARED FOOTER -->
   <footer class="site-footer">
     <div class="container">
-      <p>© 2023 Pack My Bag. All rights reserved.</p>
+      <p>© 2025 Pack My Bag. All rights reserved.</p>
     </div>
   </footer>
 
@@ -568,9 +587,13 @@ Please provide a packing list based on:
      *************************************************/
     async function generatePackingList() {
       // Collect the 11 fields
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+      const travelDates = startDate && endDate ? `${startDate} to ${endDate}` : '';
+
       const data = {
         destination: document.getElementById('destination').value,
-        travelDates: document.getElementById('travel-dates').value,
+        travelDates: travelDates,
         duration: document.getElementById('duration').value,
         travelType: document.getElementById('travel-type').value,
         activities: document.getElementById('activities').value,
@@ -581,6 +604,12 @@ Please provide a packing list based on:
         firstTime: document.getElementById('first-time').value,
         specialNeeds: document.getElementById('special-needs').value
       };
+
+      // Validate dates
+      if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        alert("End date must be after start date.");
+        return;
+      }
 
       // Store the trip data in localStorage for use in group packing list
       localStorage.setItem('tripData', JSON.stringify(data));
@@ -693,7 +722,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 6) Export Packing List to PDF
+     * 6) Export Packing List to PDF (Page 3)
      *************************************************/
     function exportToPDF() {
       const { jsPDF } = window.jspdf;
@@ -752,7 +781,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 7) Email Packing List
+     * 7) Email Packing List (Page 3)
      *************************************************/
     function emailList() {
       // Prompt for email address
@@ -984,7 +1013,109 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 15) Google Sign-In Handling
+     * 15) Export Group Packing List to PDF (Page 4)
+     *************************************************/
+    function exportGroupListToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(18);
+      doc.text("Group Packing List", 10, 10);
+
+      // Friends
+      let yPosition = 20;
+      doc.setFontSize(14);
+      doc.text("Shared With:", 10, yPosition);
+      yPosition += 10;
+
+      const friendsListDiv = document.getElementById('friends-list');
+      const friends = friendsListDiv.querySelectorAll('label');
+      doc.setFontSize(12);
+      friends.forEach(friend => {
+        const friendName = friend.textContent.trim();
+        doc.text(`- ${friendName}`, 15, yPosition);
+        yPosition += 5;
+
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 10;
+        }
+      });
+
+      yPosition += 5; // Space after friends list
+
+      // Packing List
+      doc.setFontSize(14);
+      doc.text("Packing List:", 10, yPosition);
+      yPosition += 10;
+
+      const groupPackingListDiv = document.getElementById('group-packing-list');
+      const items = groupPackingListDiv.querySelectorAll('.packing-item:not(:last-child)'); // Exclude the input row
+
+      doc.setFontSize(12);
+      items.forEach(item => {
+        const itemName = item.querySelector('label').textContent.trim();
+        const assignedTo = item.querySelector('select').value;
+        const assignedText = assignedTo === "Assign to..." ? "Not assigned" : `Assigned to: ${assignedTo}`;
+        doc.text(`- ${itemName} (${assignedText})`, 15, yPosition);
+        yPosition += 5;
+
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 10;
+        }
+      });
+
+      // Save the PDF
+      doc.save("group-packing-list.pdf");
+    }
+
+    /*************************************************
+     * 16) Email Group Packing List (Page 4)
+     *************************************************/
+    function emailGroupList() {
+      // Prompt for email address
+      const email = prompt("Enter your email address:");
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+
+      // Collect the group packing list content
+      let emailBody = "Group Packing List\n\n";
+
+      // Friends
+      emailBody += "Shared With:\n";
+      const friendsListDiv = document.getElementById('friends-list');
+      const friends = friendsListDiv.querySelectorAll('label');
+      friends.forEach(friend => {
+        const friendName = friend.textContent.trim();
+        emailBody += `- ${friendName}\n`;
+      });
+      emailBody += "\n";
+
+      // Packing List
+      emailBody += "Packing List:\n";
+      const groupPackingListDiv = document.getElementById('group-packing-list');
+      const items = groupPackingListDiv.querySelectorAll('.packing-item:not(:last-child)'); // Exclude the input row
+      items.forEach(item => {
+        const itemName = item.querySelector('label').textContent.trim();
+        const assignedTo = item.querySelector('select').value;
+        const assignedText = assignedTo === "Assign to..." ? "Not assigned" : `Assigned to: ${assignedTo}`;
+        emailBody += `- ${itemName} (${assignedText})\n`;
+      });
+
+      // Encode the email body for the mailto link
+      const encodedSubject = encodeURIComponent("Your Group Packing List from Pack My Bag");
+      const encodedBody = encodeURIComponent(emailBody);
+
+      // Open the user's email client
+      window.location.href = `mailto:${email}?subject=${encodedSubject}&body=${encodedBody}`;
+    }
+
+    /*************************************************
+     * 17) Google Sign-In Handling
      *************************************************/
     function handleCredentialResponse(response) {
       const responsePayload = parseJwt(response.credential);
