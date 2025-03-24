@@ -21,13 +21,19 @@
   <style>
     .site-header .container {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between; /* Ensure space between elements */
+      padding: 1rem;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem; /* Space between back button and logo */
     }
     .logo-container {
       display: flex;
       align-items: center;
-      gap: 10px; /* Space between logo and text */
+      gap: 10px; /* Space between logo image and text */
     }
     .logo-container img {
       width: 40px; /* Adjust size as needed */
@@ -36,6 +42,14 @@
     .logo-container .logo {
       font-size: 24px;
       font-weight: 700;
+    }
+    /* Back Button Styling */
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: none; /* Hidden by default on the first page */
     }
     /* Styling for Google Sign-In button container */
     #google-signin-btn {
@@ -128,9 +142,13 @@
   <!-- SHARED HEADER -->
   <header class="site-header">
     <div class="container">
-      <div class="logo-container">
-        <img src="backpack-logo.png" alt="Backpack Logo" />
-        <div class="logo">Pack My Bag</div>
+      <div class="header-left">
+        <!-- Back Button -->
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="logo-container">
+          <img src="backpack-logo.png" alt="Backpack Logo" />
+          <div class="logo">Pack My Bag</div>
+        </div>
       </div>
       <nav class="nav-menu">
         <ul>
@@ -436,13 +454,41 @@
       // Exposing your key in client-side code is not secure for production.
 
     /*************************************************
-     * 2) Show/hide pages
+     * 2) Page Navigation with History Tracking
      *************************************************/
+    let pageHistory = ['page1']; // Start with the first page
+
     function showPage(pageId) {
+      // Hide all pages
       document.querySelectorAll('.page').forEach(section => {
         section.style.display = 'none';
       });
+
+      // Show the requested page
       document.getElementById(pageId).style.display = 'block';
+
+      // Update history
+      if (pageHistory[pageHistory.length - 1] !== pageId) {
+        pageHistory.push(pageId);
+      }
+
+      // Show/hide back button based on history
+      updateBackButtonVisibility();
+    }
+
+    function goBack() {
+      if (pageHistory.length > 1) {
+        // Remove the current page from history
+        pageHistory.pop();
+        // Show the previous page
+        const previousPage = pageHistory[pageHistory.length - 1];
+        showPage(previousPage);
+      }
+    }
+
+    function updateBackButtonVisibility() {
+      const backBtn = document.querySelector('.back-btn');
+      backBtn.style.display = pageHistory.length > 1 ? 'block' : 'none';
     }
 
     // By default, show page1 (index)
@@ -451,6 +497,7 @@
         section.style.display = 'none';
       });
       document.getElementById('page1').style.display = 'block';
+      updateBackButtonVisibility();
 
       // Check for existing user in localStorage
       const user = localStorage.getItem('user');
