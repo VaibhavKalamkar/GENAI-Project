@@ -10,6 +10,9 @@
   <!-- Google Identity Services Library for Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+  <!-- jsPDF Library for PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <!-- Optional: Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -134,6 +137,20 @@
     }
     .packing-item button {
       padding: 0.5rem 1rem;
+    }
+    /* Styling for buttons on Page 3 */
+    .packing-list button {
+      margin-right: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .packing-list .cta-btn {
+      background: #28a745;
+      color: #fff;
+      border: none;
     }
   </style>
 </head>
@@ -411,8 +428,8 @@
 
           <p class="weight-estimator">Estimated weight: 12 kg</p>
 
-          <button>Export PDF</button>
-          <button>Email List</button>
+          <button onclick="exportToPDF()">Export PDF</button>
+          <button onclick="emailList()">Email List</button>
           <button class="cta-btn" onclick="promptForFriendsAndGenerateGroupList()">Create Group Pack List</button>
         </div>
       </div>
@@ -441,7 +458,7 @@
   <!-- SHARED FOOTER -->
   <footer class="site-footer">
     <div class="container">
-      <p>© 2025 Pack My Bag. All rights reserved.</p>
+      <p>© 2023 Pack My Bag. All rights reserved.</p>
     </div>
   </footer>
 
@@ -676,7 +693,114 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 6) Prompt for Friends' Names
+     * 6) Export Packing List to PDF
+     *************************************************/
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(18);
+      doc.text("Packing List", 10, 10);
+
+      // Categories and items
+      let yPosition = 20;
+      const categories = [
+        { name: "Clothes", id: "clothesOutput" },
+        { name: "Toiletries", id: "toiletriesOutput" },
+        { name: "Gadgets", id: "gadgetsOutput" },
+        { name: "Travel Docs", id: "docsOutput" },
+        { name: "Meds", id: "medsOutput" },
+        { name: "Optional Extras", id: "extrasOutput" }
+      ];
+
+      categories.forEach(category => {
+        const categoryDiv = document.getElementById(category.id);
+        const items = categoryDiv.querySelectorAll('label');
+
+        if (items.length > 0) {
+          // Add category heading
+          doc.setFontSize(14);
+          doc.text(category.name, 10, yPosition);
+          yPosition += 10;
+
+          // Add items
+          doc.setFontSize(12);
+          items.forEach(item => {
+            const itemText = item.textContent.trim();
+            doc.text(`- ${itemText}`, 15, yPosition);
+            yPosition += 5;
+
+            // Check if we need a new page
+            if (yPosition > 270) {
+              doc.addPage();
+              yPosition = 10;
+            }
+          });
+
+          yPosition += 5; // Space between categories
+        }
+      });
+
+      // Add estimated weight
+      const weight = document.querySelector('.weight-estimator').textContent;
+      doc.setFontSize(12);
+      doc.text(weight, 10, yPosition);
+
+      // Save the PDF
+      doc.save("packing-list.pdf");
+    }
+
+    /*************************************************
+     * 7) Email Packing List
+     *************************************************/
+    function emailList() {
+      // Prompt for email address
+      const email = prompt("Enter your email address:");
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+
+      // Collect the packing list content
+      let emailBody = "Packing List\n\n";
+      const categories = [
+        { name: "Clothes", id: "clothesOutput" },
+        { name: "Toiletries", id: "toiletriesOutput" },
+        { name: "Gadgets", id: "gadgetsOutput" },
+        { name: "Travel Docs", id: "docsOutput" },
+        { name: "Meds", id: "medsOutput" },
+        { name: "Optional Extras", id: "extrasOutput" }
+      ];
+
+      categories.forEach(category => {
+        const categoryDiv = document.getElementById(category.id);
+        const items = categoryDiv.querySelectorAll('label');
+
+        if (items.length > 0) {
+          emailBody += `${category.name}\n`;
+          items.forEach(item => {
+            const itemText = item.textContent.trim();
+            emailBody += `- ${itemText}\n`;
+          });
+          emailBody += "\n";
+        }
+      });
+
+      // Add estimated weight
+      const weight = document.querySelector('.weight-estimator').textContent;
+      emailBody += `${weight}\n`;
+
+      // Encode the email body for the mailto link
+      const encodedSubject = encodeURIComponent("Your Packing List from Pack My Bag");
+      const encodedBody = encodeURIComponent(emailBody);
+
+      // Open the user's email client
+      window.location.href = `mailto:${email}?subject=${encodedSubject}&body=${encodedBody}`;
+    }
+
+    /*************************************************
+     * 8) Prompt for Friends' Names
      *************************************************/
     let friendsList = [];
 
@@ -702,7 +826,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 7) Prompt for Friends and Generate Group Packing List
+     * 9) Prompt for Friends and Generate Group Packing List
      *************************************************/
     function promptForFriendsAndGenerateGroupList() {
       promptForFriends();
@@ -714,7 +838,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 8) Build Prompt for Group Packing List
+     * 10) Build Prompt for Group Packing List
      *************************************************/
     function buildGroupUserMessage(data) {
       return `
@@ -741,7 +865,7 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 9) Chat Completions request to Mistral (Group Packing List)
+     * 11) Chat Completions request to Mistral (Group Packing List)
      *************************************************/
     async function generateGroupPackingList() {
       const tripData = JSON.parse(localStorage.getItem('tripData'));
@@ -791,7 +915,7 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 10) Display Group Packing List
+     * 12) Display Group Packing List
      *************************************************/
     function displayGroupPackingList(responseText) {
       const groupPackingListDiv = document.getElementById('group-packing-list');
@@ -821,7 +945,7 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 11) Create a Packing Item Row
+     * 13) Create a Packing Item Row
      *************************************************/
     function createPackingItem(item, index) {
       const packingItem = document.createElement('div');
@@ -838,7 +962,7 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 12) Add New Item Functionality
+     * 14) Add New Item Functionality
      *************************************************/
     function addNewItem() {
       const newItemInput = document.getElementById('new-item-input');
@@ -860,7 +984,7 @@ Please provide a group packing list based on:
     }
 
     /*************************************************
-     * 13) Google Sign-In Handling
+     * 15) Google Sign-In Handling
      *************************************************/
     function handleCredentialResponse(response) {
       const responsePayload = parseJwt(response.credential);
