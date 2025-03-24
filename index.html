@@ -93,6 +93,34 @@
       font-weight: 500;
       margin: 0;
     }
+    /* Styling for the group packing list */
+    .group-list-container {
+      padding: 2rem;
+    }
+    .group-list-container h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .group-list-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .packing-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .packing-item label {
+      flex: 1;
+    }
+    .packing-item select, .packing-item input {
+      flex: 1;
+      padding: 0.5rem;
+    }
+    .packing-item button {
+      padding: 0.5rem 1rem;
+    }
   </style>
 </head>
 <body>
@@ -367,7 +395,7 @@
 
           <button>Export PDF</button>
           <button>Email List</button>
-          <button class="cta-btn" onclick="showPage('page4')">Create Group Pack List</button>
+          <button class="cta-btn" onclick="promptForFriendsAndGenerateGroupList()">Create Group Pack List</button>
         </div>
       </div>
     </section>
@@ -377,41 +405,14 @@
     <section id="page4" class="page">
       <div class="group-list-container">
         <h2>Share List With</h2>
-        <label><input type="checkbox" /> Alice Johnson</label><br>
-        <label><input type="checkbox" /> Bob Smith</label><br>
-        <label><input type="checkbox" /> Charlie Brown</label><br>
-        <button>Manage Sharing</button>
+        <div id="friends-list">
+          <!-- Friends will be dynamically added here -->
+        </div>
+        <button onclick="promptForFriends()">Manage Sharing</button>
 
         <h2>Packing List</h2>
-        <div class="packing-item">
-          <label for="item1">Toothbrush</label>
-          <select id="item1">
-            <option>Assign to...</option>
-            <option>Alice</option>
-            <option>Bob</option>
-            <option>Charlie</option>
-          </select>
-          <button>Add Item</button>
-        </div>
-        <div class="packing-item">
-          <label for="item2">Sunscreen</label>
-          <select id="item2">
-            <option>Assign to...</option>
-            <option>Alice</option>
-            <option>Bob</option>
-            <option>Charlie</option>
-          </select>
-          <button>Add Item</button>
-        </div>
-        <div class="packing-item">
-          <input type="text" placeholder="New item name..." />
-          <select>
-            <option>Assign to...</option>
-            <option>Alice</option>
-            <option>Bob</option>
-            <option>Charlie</option>
-          </select>
-          <button>Add Item</button>
+        <div id="group-packing-list">
+          <!-- Group packing list items will be dynamically added here -->
         </div>
       </div>
     </section>
@@ -464,7 +465,7 @@
     };
 
     /*************************************************
-     * 3) Prompt for EXACT headings & short items
+     * 3) Prompt for EXACT headings & short items (Individual Packing List)
      *************************************************/
     function buildUserMessage(data) {
       return `
@@ -499,7 +500,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 4) Chat Completions request to Mistral
+     * 4) Chat Completions request to Mistral (Individual Packing List)
      *************************************************/
     async function generatePackingList() {
       // Collect the 11 fields
@@ -516,6 +517,9 @@ Please provide a packing list based on:
         firstTime: document.getElementById('first-time').value,
         specialNeeds: document.getElementById('special-needs').value
       };
+
+      // Store the trip data in localStorage for use in group packing list
+      localStorage.setItem('tripData', JSON.stringify(data));
 
       const userMessage = buildUserMessage(data);
 
@@ -543,7 +547,6 @@ Please provide a packing list based on:
         }
 
         const result = await response.json();
-        // Typically, the text is in result.choices[0].message.content
         const packingResponse = result.choices?.[0]?.message?.content || "No response from Mistral.";
 
         // 5) Show raw text with newlines preserved
@@ -562,7 +565,7 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 7) Updated parser to handle multi-line categories and create checkboxes
+     * 5) Updated parser to handle multi-line categories and create checkboxes
      *************************************************/
     function displayPackingList(responseText) {
       // Clear existing outputs
@@ -626,23 +629,202 @@ Please provide a packing list based on:
     }
 
     /*************************************************
-     * 8) Google Sign-In Handling
+     * 6) Prompt for Friends' Names
      *************************************************/
-    // Callback function for Google Sign-In
+    let friendsList = [];
+
+    function promptForFriends() {
+      let friendsInput = prompt("Enter your friends' names (separated by commas, e.g., John, Jane, Alex):");
+      if (friendsInput) {
+        friendsList = friendsInput.split(',').map(name => name.trim()).filter(name => name);
+        updateFriendsList();
+      }
+    }
+
+    function updateFriendsList() {
+      const friendsListDiv = document.getElementById('friends-list');
+      friendsListDiv.innerHTML = '';
+      friendsList.forEach(friend => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(' ' + friend));
+        friendsListDiv.appendChild(label);
+      });
+    }
+
+    /*************************************************
+     * 7) Prompt for Friends and Generate Group Packing List
+     *************************************************/
+    function promptForFriendsAndGenerateGroupList() {
+      promptForFriends();
+      if (friendsList.length > 0) {
+        generateGroupPackingList();
+      } else {
+        alert("Please add at least one friend to create a group packing list.");
+      }
+    }
+
+    /*************************************************
+     * 8) Build Prompt for Group Packing List
+     *************************************************/
+    function buildGroupUserMessage(data) {
+      return `
+Please provide a group packing list based on:
+- Destination: ${data.destination}
+- Travel Dates: ${data.travelDates}
+- Duration: ${data.duration} days
+- Travel Type: ${data.travelType}
+- Activities: ${data.activities}
+- Accommodation: ${data.accommodationType}
+- Luggage: ${data.luggageType}
+- Gender: ${data.gender}
+- With kids: ${data.kids}
+- First-time traveler: ${data.firstTime}
+- Special needs: ${data.specialNeeds}
+
+**Constraints**:
+1. Provide a list of up to 6 items that typically only one person in a group needs to bring (e.g., Bluetooth Speaker, Board Games, Liquor).
+2. Each item must be no more than 3 words.
+3. Ideally each item is under 15 characters total.
+4. Provide only the item list (no headings, no lengthy paragraphs).
+5. Avoid braces, parentheses, or special punctuation. Use plain text lines.
+`;
+    }
+
+    /*************************************************
+     * 9) Chat Completions request to Mistral (Group Packing List)
+     *************************************************/
+    async function generateGroupPackingList() {
+      const tripData = JSON.parse(localStorage.getItem('tripData'));
+      if (!tripData) {
+        alert("Please generate an individual packing list first.");
+        return;
+      }
+
+      const userMessage = buildGroupUserMessage(tripData);
+
+      try {
+        const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${MISTRAL_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "mistral-large-latest", 
+            messages: [
+              {
+                role: "user",
+                content: userMessage
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`Mistral API error: ${response.status} ${response.statusText}\n${errorBody}`);
+        }
+
+        const result = await response.json();
+        const groupPackingResponse = result.choices?.[0]?.message?.content || "No response from Mistral.";
+
+        // Display the group packing list
+        displayGroupPackingList(groupPackingResponse);
+
+        // Show the "Group Packing List" page
+        showPage('page4');
+
+      } catch (err) {
+        alert("Error: " + err.message);
+        console.error(err);
+      }
+    }
+
+    /*************************************************
+     * 10) Display Group Packing List
+     *************************************************/
+    function displayGroupPackingList(responseText) {
+      const groupPackingListDiv = document.getElementById('group-packing-list');
+      groupPackingListDiv.innerHTML = '';
+
+      // Split the response into lines
+      const items = responseText.split('\n').map(item => item.trim()).filter(item => item).slice(0, 6);
+
+      // Add initial items from Mistral response
+      items.forEach((item, index) => {
+        const packingItem = createPackingItem(item, index);
+        groupPackingListDiv.appendChild(packingItem);
+      });
+
+      // Add a row for adding new items
+      const newItemRow = document.createElement('div');
+      newItemRow.className = 'packing-item';
+      newItemRow.innerHTML = `
+        <input type="text" id="new-item-input" placeholder="New item name...">
+        <select id="new-item-assign">
+          <option>Assign to...</option>
+          ${friendsList.map(friend => `<option>${friend}</option>`).join('')}
+        </select>
+        <button onclick="addNewItem()">Add Item</button>
+      `;
+      groupPackingListDiv.appendChild(newItemRow);
+    }
+
+    /*************************************************
+     * 11) Create a Packing Item Row
+     *************************************************/
+    function createPackingItem(item, index) {
+      const packingItem = document.createElement('div');
+      packingItem.className = 'packing-item';
+      packingItem.innerHTML = `
+        <label for="item${index}">${item}</label>
+        <select id="item${index}">
+          <option>Assign to...</option>
+          ${friendsList.map(friend => `<option>${friend}</option>`).join('')}
+        </select>
+        <button onclick="alert('Item assigned!')">Add Item</button>
+      `;
+      return packingItem;
+    }
+
+    /*************************************************
+     * 12) Add New Item Functionality
+     *************************************************/
+    function addNewItem() {
+      const newItemInput = document.getElementById('new-item-input');
+      const newItem = newItemInput.value.trim();
+      if (!newItem) {
+        alert("Please enter an item name.");
+        return;
+      }
+
+      const groupPackingListDiv = document.getElementById('group-packing-list');
+      const newIndex = groupPackingListDiv.querySelectorAll('.packing-item').length - 1; // Subtract 1 for the input row
+      const packingItem = createPackingItem(newItem, newIndex);
+
+      // Insert the new item before the input row
+      groupPackingListDiv.insertBefore(packingItem, groupPackingListDiv.lastElementChild);
+
+      // Clear the input
+      newItemInput.value = '';
+    }
+
+    /*************************************************
+     * 13) Google Sign-In Handling
+     *************************************************/
     function handleCredentialResponse(response) {
-      // Decode the JWT ID token
       const responsePayload = parseJwt(response.credential);
 
-      // Display user info
       document.getElementById('user-name').textContent = responsePayload.name;
       document.getElementById('user-email').textContent = responsePayload.email;
       document.getElementById('user-picture').src = responsePayload.picture;
       document.getElementById('user-info').style.display = 'block';
 
-      // Hide the sign-in button
       document.getElementById('google-signin-btn').style.display = 'none';
 
-      // Optionally store user info in localStorage or send to your backend
       localStorage.setItem('user', JSON.stringify({
         name: responsePayload.name,
         email: responsePayload.email,
@@ -650,7 +832,6 @@ Please provide a packing list based on:
       }));
     }
 
-    // Function to parse JWT token
     function parseJwt(token) {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -660,16 +841,10 @@ Please provide a packing list based on:
       return JSON.parse(jsonPayload);
     }
 
-    // Sign-out function
     function signOut() {
-      // Clear user info display
       document.getElementById('user-info').style.display = 'none';
       document.getElementById('google-signin-btn').style.display = 'block';
-
-      // Clear localStorage
       localStorage.removeItem('user');
-
-      // Optionally, you can revoke the token on the server-side if needed
       console.log('User signed out.');
     }
   </script>
