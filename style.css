@@ -1,35 +1,31 @@
 /* styles.css */
-
-/* BASIC RESET */
+/* Basic reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* GLOBAL BODY STYLES */
+/* BODY & GLOBAL */
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f8fff4; /* Subtle greenish background */
+  background-color: #f8fff4;
   color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-/* CONTAINERS & UTILS */
-.container {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* HEADER / NAV */
+/* HEADER & NAV */
 .site-header {
   background-color: #c4f1c4; /* Light green */
-  padding: 1rem 0;
+  padding: 1rem;
 }
 .site-header .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 .logo {
   font-weight: 700;
@@ -46,24 +42,23 @@ body {
   font-weight: 500;
 }
 
-/* FOOTER */
-.site-footer {
-  background-color: #c4f1c4;
-  text-align: center;
-  padding: 1rem 0;
-  margin-top: 2rem;
+/* MAIN LAYOUT */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 /* PAGE SECTIONS */
 .page {
-  display: none; /* hidden by default, shown via JS */
-  padding: 2rem 1rem;
+  display: none; /* hidden by default, shown by JS */
+  padding: 1rem 0;
 }
 .page.active {
   display: block;
 }
 
-/* HERO SECTION (INDEX) */
+/* HERO SECTION (PAGE 1) */
 .hero-section {
   text-align: center;
   padding: 3rem 1rem;
@@ -96,6 +91,9 @@ body {
   text-align: center;
   margin-top: 2rem;
 }
+.how-it-works h2 {
+  margin-bottom: 1rem;
+}
 .steps {
   display: flex;
   flex-wrap: wrap;
@@ -113,6 +111,9 @@ body {
   margin-top: 2rem;
   padding: 2rem 1rem;
   text-align: center;
+}
+.key-features h2 {
+  margin-bottom: 1rem;
 }
 .features-list {
   display: flex;
@@ -134,6 +135,9 @@ body {
   text-align: center;
   margin-top: 2rem;
 }
+.testimonial-section h2 {
+  margin-bottom: 1rem;
+}
 .testimonial {
   display: inline-block;
   background-color: #fff;
@@ -147,6 +151,9 @@ body {
   text-align: center;
   margin-top: 2rem;
   padding: 2rem 1rem;
+}
+.newsletter-section h2 {
+  margin-bottom: 1rem;
 }
 .newsletter-form {
   margin-top: 1rem;
@@ -165,19 +172,20 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-top: 2rem;
 }
 .trip-form,
 .optional-filters,
 .sidebar-info {
-  background-color: #fff;
   flex: 1 1 300px;
+  background-color: #fff;
   padding: 1rem;
   border-radius: 8px;
 }
 .trip-form label,
 .optional-filters label {
   display: block;
-  margin: 0.5rem 0 0.2rem 0;
+  margin-top: 1rem;
 }
 .trip-form input,
 .trip-form select,
@@ -185,7 +193,7 @@ body {
 .optional-filters select {
   width: 100%;
   padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.3rem;
 }
 .travel-tips ul {
   list-style: disc;
@@ -196,6 +204,7 @@ body {
 .packing-list-container {
   display: flex;
   gap: 1rem;
+  margin-top: 2rem;
 }
 .sidebar {
   flex: 1 1 200px;
@@ -208,6 +217,9 @@ body {
   background-color: #fff;
   padding: 1rem;
   border-radius: 8px;
+}
+.packing-list h2 {
+  margin-top: 0;
 }
 .item-category {
   margin-bottom: 1rem;
@@ -223,7 +235,7 @@ body {
   padding: 1rem;
   border-radius: 8px;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 2rem auto;
 }
 .group-list-container label {
   display: block;
