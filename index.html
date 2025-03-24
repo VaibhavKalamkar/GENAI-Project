@@ -13,13 +13,38 @@
   <link 
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" 
     rel="stylesheet">
+
+  <!-- Inline CSS for logo styling -->
+  <style>
+    .site-header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* Space between logo and text */
+    }
+    .logo-container img {
+      width: 40px; /* Adjust size as needed */
+      height: auto;
+    }
+    .logo-container .logo {
+      font-size: 24px;
+      font-weight: 700;
+    }
+  </style>
 </head>
 <body>
 
   <!-- SHARED HEADER -->
   <header class="site-header">
     <div class="container">
-      <div class="logo">Pack My Bag</div>
+      <div class="logo-container">
+        <img src="backpack-logo.png" alt="Backpack Logo" />
+        <div class="logo">Pack My Bag</div>
+      </div>
       <nav class="nav-menu">
         <ul>
           <li><a href="#">About</a></li>
@@ -110,7 +135,6 @@
       </section>
     </section>
     <!-- END PAGE 1 -->
-
 
     <!-- PAGE 2: Trip Details -->
     <section id="page2" class="page">
@@ -206,7 +230,6 @@
     </section>
     <!-- END PAGE 2 -->
 
-
     <!-- PAGE 3: Packing List -->
     <section id="page3" class="page">
       <div class="packing-list-container">
@@ -264,7 +287,6 @@
       </div>
     </section>
     <!-- END PAGE 3 -->
-
 
     <!-- PAGE 4: Group Packing List -->
     <section id="page4" class="page">
